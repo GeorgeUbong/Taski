@@ -10,6 +10,8 @@ import {
   Cog6ToothIcon,
   PlusIcon,
   ArrowPathIcon,
+  Bars3Icon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../hooks/useAuth";
 import { useProfile } from "../hooks/useProfile";
@@ -39,6 +41,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // State for dropdown visibility
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Ref for click-outside detection
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -90,17 +93,36 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
-      {/* 1. Static Sidebar - Hidden on mobile */}
-      <div className="hidden lg:flex w-64 shrink-0 bg-white border-r border-gray-200 flex-col">
-        <div className="p-6">
+      {/* 1. Sidebar - Always visible on desktop, toggleable on mobile */}
+      <div
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex-col transform transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h1 className="text-xl font-bold text-gray-900">Taski</h1>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+            aria-label="Close sidebar"
+          >
+            <XMarkIcon className="w-6 h-6 text-gray-600" />
+          </button>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navigation.map((item) => (
             <Link
               key={item.name}
               to={item.href}
+              onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center px-3 py-2.5 rounded-lg transition duration-150 
                 ${currentPath === item.href || (item.href === "/board" && currentPath.startsWith("/board"))
                   ? "bg-blue-50 text-blue-600 font-medium"
@@ -115,14 +137,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* 2. Main Content Area */}
-      <div className="flex flex-col flex-1 overflow-hidden min-w-0 shrink">
+      <div className="flex flex-col flex-1 overflow-hidden min-w-0 w-full lg:w-auto">
 
         {/* Topbar */}
-        <header className="flex-shrink-0 bg-white border-b border-gray-200">
+        <header className="shrink-0 bg-white border-b border-gray-200">
           <div className="flex justify-between items-center h-16 px-4 lg:px-6">
-            {/* Left: Logo and Create Button */}
+            {/* Left: Mobile menu button, Logo and Create Button */}
             <div className="flex items-center space-x-4">
-              {/* Mobile menu button - can be added later */}
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+                aria-label="Open sidebar"
+              >
+                <Bars3Icon className="w-6 h-6 text-gray-600" />
+              </button>
               <div className="lg:hidden">
                 <h1 className="text-lg font-bold text-gray-900">Taski</h1>
               </div>
