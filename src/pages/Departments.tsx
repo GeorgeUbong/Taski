@@ -26,17 +26,18 @@ export default function Departments() {
 
     return (
         <DashboardLayout>
-            <h2 className="text-3xl font-bold mb-8 text-gray-800">Departments</h2>
+            <h1 className="text-3xl font-bold mb-2 text-gray-900">Departments</h1>
+            <p className="text-gray-600 mb-6">Manage and view all departments</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                 {allDepartments.map((deptName) => {
                     const isUserDepartment = deptName === profile?.department_id;
 
                     return (
                         <div
                             key={deptName}
-                            className={`bg-white p-6 rounded-xl shadow-lg transition duration-200 
-                ${isUserDepartment ? "border-l-4 border-green-500 hover:shadow-xl" : "border-l-4 border-gray-200 hover:shadow-md"}`}
+                            className={`bg-white p-5 lg:p-6 rounded-lg border transition duration-200 
+                ${isUserDepartment ? "border-green-500 shadow-sm hover:shadow-md" : "border-gray-200 shadow-sm hover:shadow-md"}`}
                         >
                             <h3 className="text-xl font-semibold mb-3">{deptName}</h3>
 

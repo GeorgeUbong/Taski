@@ -7,10 +7,13 @@ import {
   UserCircleIcon,
   ArrowLeftOnRectangleIcon,
   BellIcon,
+  Cog6ToothIcon,
+  PlusIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../hooks/useAuth";
 import { useProfile } from "../hooks/useProfile";
-import NotificationPanel from "../components/notifications/NotificationPanel";
+import NotificationPanel from "../components/notifications/NotificationsPanel";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -18,9 +21,11 @@ interface DashboardLayoutProps {
 
 // Sidebar Navigation Items
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
-  { name: "Project Board", href: "/board", icon: ClipboardDocumentListIcon },
+  { name: "Board", href: "/board", icon: ClipboardDocumentListIcon },
+  { name: "Projects", href: "/dashboard", icon: HomeIcon },
   { name: "Departments", href: "/departments", icon: BuildingOffice2Icon },
+  { name: "Teams", href: "/teams", icon: BuildingOffice2Icon },
+  { name: "Completed", href: "/completed", icon: ArrowPathIcon },
 ];
 
 /**
@@ -86,57 +91,68 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
 
-      {/* 1. Static Sidebar */}
-      <div className="w-64 flex-shrink-0 bg-white shadow-xl flex flex-col">
+      {/* 1. Static Sidebar - Hidden on mobile */}
+      <div className="hidden lg:flex w-64 shrink-0 bg-white border-r border-gray-200 flex-col">
         <div className="p-6">
-          <h1 className="text-2xl font-black text-blue-600">RESEARCH-HUB</h1>
+          <h1 className="text-xl font-bold text-gray-900">Taski</h1>
         </div>
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className="flex-1 px-3 py-4 space-y-1">
           {navigation.map((item) => (
             <Link
               key={item.name}
               to={item.href}
-              className={`flex items-center p-3 rounded-xl transition duration-150 
-                ${currentPath === item.href
-                  ? "bg-blue-500 text-white shadow-lg shadow-blue-200"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+              className={`flex items-center px-3 py-2.5 rounded-lg transition duration-150 
+                ${currentPath === item.href || (item.href === "/board" && currentPath.startsWith("/board"))
+                  ? "bg-blue-50 text-blue-600 font-medium"
+                  : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                 }`}
             >
-              <item.icon className="w-6 h-6 mr-3" />
-              <span className="font-medium">{item.name}</span>
+              <item.icon className="w-5 h-5 mr-3" />
+              <span className="text-sm">{item.name}</span>
             </Link>
           ))}
         </nav>
-        <div className="p-4 border-t border-gray-100">
-          <p className="text-xs text-gray-400">Logged in as:</p>
-          <p className="text-sm font-medium text-gray-700 truncate">
-            {profile?.email || 'user@example.com'}
-          </p>
-        </div>
       </div>
 
       {/* 2. Main Content Area */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden min-w-0 shrink">
 
         {/* Topbar */}
-        <header className="flex-shrink-0 bg-white shadow-md">
-          <div className="flex justify-between items-center h-16 px-8">
-            <h2 className="text-xl font-bold text-gray-800">
-              {navigation.find(n => n.href === currentPath)?.name || "Welcome"}
-            </h2>
-
+        <header className="flex-shrink-0 bg-white border-b border-gray-200">
+          <div className="flex justify-between items-center h-16 px-4 lg:px-6">
+            {/* Left: Logo and Create Button */}
             <div className="flex items-center space-x-4">
+              {/* Mobile menu button - can be added later */}
+              <div className="lg:hidden">
+                <h1 className="text-lg font-bold text-gray-900">Taski</h1>
+              </div>
+              <button className="hidden sm:flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-150 text-sm font-medium">
+                <PlusIcon className="w-4 h-4 mr-2" />
+                Create
+              </button>
+            </div>
+
+            {/* Right: Icons */}
+            <div className="flex items-center space-x-3 lg:space-x-4">
+
+              {/* Settings Icon */}
+              <button
+                className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition duration-150"
+                aria-label="Settings"
+              >
+                <Cog6ToothIcon className="w-5 h-5" />
+              </button>
 
               {/* Notification Bell Icon & Dropdown */}
               <div className="relative" ref={notificationsRef}>
                 <button
                   onClick={toggleNotifications}
-                  className="p-2 rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 transition duration-150 relative"
+                  className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition duration-150 relative"
                   aria-label="Show notifications"
                 >
-                  <BellIcon className="w-6 h-6" />
+                  <BellIcon className="w-5 h-5" />
                   {unreadNotificationCount > 0 && (
-                    <span className="absolute top-1 right-1 block h-3 w-3 rounded-full ring-2 ring-white bg-red-500">
+                    <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-500">
                     </span>
                   )}
                 </button>
@@ -150,10 +166,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="relative" ref={profileMenuRef}>
                 <button
                   onClick={toggleProfileMenu}
-                  className="flex items-center p-1 rounded-full text-gray-600 hover:ring-2 hover:ring-blue-500 transition duration-150"
+                  className="flex items-center p-1 rounded-full hover:ring-2 hover:ring-gray-200 transition duration-150"
                   aria-label="Open user menu"
                 >
-                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center font-bold text-sm text-gray-700">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-semibold text-sm text-white">
                     {profile?.full_name?.[0]?.toUpperCase() ?? "U"}
                   </div>
                 </button>
@@ -196,7 +212,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 xl:p-8">
           {children}
         </main>
       </div>

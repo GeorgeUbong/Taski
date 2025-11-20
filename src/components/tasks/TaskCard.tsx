@@ -1,13 +1,46 @@
 import { EllipsisVerticalIcon, CalendarIcon } from "@heroicons/react/24/outline";
+import type { Task } from "../../lib/fetchTasks";
 
-// Define the interface for a single task item, matching the updated mock data
-export interface Task { // <-- Exported Task interface
-    id: number;
-    title: string;
-    status: 'To Do' | 'In Progress' | 'Done';
-    priority: 'High' | 'Medium' | 'Low';
-    assignee: string; // Placeholder for assignee initials
-}
+// Helper to get status dot color
+const getStatusDotColor = (status: Task['status']): string => {
+    switch (status) {
+        case 'todo': return 'bg-green-500';
+        case 'in_progress': return 'bg-yellow-500';
+        case 'completed': return 'bg-blue-500';
+        default: return 'bg-gray-400';
+    }
+};
+
+// Helper to format date
+const formatDate = (dateString?: string): string => {
+    if (!dateString) return 'No date';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch {
+        return 'Invalid date';
+    }
+};
+
+// Helper to convert database status to display format
+const formatStatus = (status: Task['status']): string => {
+    switch (status) {
+        case 'todo': return 'To Do';
+        case 'in_progress': return 'In Progress';
+        case 'completed': return 'Done';
+        default: return status;
+    }
+};
+
+// Helper to convert database priority to display format
+const formatPriority = (priority: Task['priority']): 'High' | 'Medium' | 'Low' => {
+    switch (priority) {
+        case 'high': return 'High';
+        case 'medium': return 'Medium';
+        case 'low': return 'Low';
+        default: return 'Medium';
+    }
+};
 
 interface TaskCardProps {
     task: Task;
@@ -19,11 +52,11 @@ interface TaskCardProps {
  */
 const getPriorityStyles = (priority: Task['priority']) => {
     switch (priority) {
-        case 'High':
+        case 'high':
             return 'text-red-600 bg-red-100 border-red-300';
-        case 'Medium':
+        case 'medium':
             return 'text-yellow-600 bg-yellow-100 border-yellow-300';
-        case 'Low':
+        case 'low':
             return 'text-green-600 bg-green-100 border-green-300';
         default:
             return 'text-gray-600 bg-gray-100 border-gray-300';
@@ -34,70 +67,65 @@ const getPriorityStyles = (priority: Task['priority']) => {
  * Renders a detailed, draggable card for a single task item.
  */
 export default function TaskCard({ task, columnColor }: TaskCardProps) {
-    const { title, priority, assignee, id, status } = task;
+    const { title, description, priority, assignee, id, status, created_at } = task;
+    const displayPriority = formatPriority(priority);
+    const statusDotColor = getStatusDotColor(status);
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
         // Set the data being dragged: the task ID and its current status
-        e.dataTransfer.setData("taskId", id.toString());
+        e.dataTransfer.setData("taskId", id);
         e.dataTransfer.setData("currentStatus", status);
         // Add visual feedback while dragging
-        e.currentTarget.classList.add("opacity-50", "ring-4", "ring-blue-300");
+        e.currentTarget.classList.add("opacity-50", "ring-2", "ring-blue-300");
     };
 
     const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
         // Clean up the class when dragging stops
-        e.currentTarget.classList.remove("opacity-50", "ring-4", "ring-blue-300");
+        e.currentTarget.classList.remove("opacity-50", "ring-2", "ring-blue-300");
     };
+
+    // Extract subtitle from description or use a default
+    const subtitle = description || "Task";
 
     return (
         <div
-            className="bg-white p-4 rounded-xl shadow-lg cursor-grab hover:shadow-xl transition duration-150 border-l-4 group"
-            // Apply column color dynamically to the left border
-            style={{ borderLeftColor: columnColor }}
-            // Drag-and-Drop attributes
+            className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-grab hover:shadow-md transition-all duration-200 group relative"
             draggable
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex justify-between items-start mb-2">
-                <p className="font-semibold text-gray-800 text-base leading-snug break-words pr-4">
+            {/* Status Dot - Top Right */}
+            <div className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full ${statusDotColor}`} />
+
+            {/* Title */}
+            <div className="pr-6 mb-2">
+                <h3 className="font-semibold text-gray-900 text-sm leading-tight">
                     {title}
+                </h3>
+            </div>
+
+            {/* Subtitle */}
+            <div className="mb-3">
+                <p className="text-xs text-gray-500">
+                    {subtitle}
                 </p>
-                <button
-                    className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition opacity-0 group-hover:opacity-100 p-1 -mt-1 -mr-1"
-                    aria-label="More options"
-                >
-                    <EllipsisVerticalIcon className="w-5 h-5" />
-                </button>
             </div>
 
-            {/* Priority and ID */}
-            <div className="flex items-center space-x-2 mb-3">
-                <span
-                    className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getPriorityStyles(priority)}`}
-                >
-                    {priority}
-                </span>
-                <span className="text-xs text-gray-400">Task ID: {id}</span>
-            </div>
-
-            {/* Footer: Assignee and Due Date */}
-            <div className="flex justify-between items-center border-t pt-3 mt-3 border-gray-100">
-                {/* Assignee Avatar */}
-                <div className="flex items-center -space-x-2">
-                    {/* Avatar Stack Placeholder */}
-                    <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold text-white ring-2 ring-white shadow">
-                        {assignee.charAt(0).toUpperCase()}
-                    </div>
-                </div>
-
-                {/* Due Date Placeholder */}
-                <div className="flex items-center text-sm text-gray-500">
-                    <CalendarIcon className="w-4 h-4 mr-1 text-gray-400" />
-                    <span>Oct 25</span> {/* Mock Due Date */}
+            {/* Footer: Due Date */}
+            <div className="flex justify-end items-center pt-3 border-t border-gray-100">
+                <div className="flex items-center text-xs text-gray-500">
+                    <CalendarIcon className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
+                    <span>{formatDate(created_at)}</span>
                 </div>
             </div>
 
+            {/* Options Button - Hidden by default, shown on hover */}
+            <button
+                className="absolute top-2 right-2 p-1.5 rounded hover:bg-gray-100 transition opacity-0 group-hover:opacity-100"
+                aria-label="More options"
+            >
+                <EllipsisVerticalIcon className="w-4 h-4 text-gray-400" />
+            </button>
         </div>
     );
 }

@@ -77,9 +77,11 @@ export default function Profile() {
     return (
         <DashboardLayout>
             <Toaster position="top-center" />
-            <h2 className="text-3xl font-bold mb-8 text-gray-800">My Profile</h2>
+            <div className="max-w-2xl">
+                <h1 className="text-3xl font-bold mb-2 text-gray-900">My Profile</h1>
+                <p className="text-gray-600 mb-6">Manage your account settings and preferences</p>
 
-            <div className="bg-white p-6 shadow-xl rounded-2xl max-w-2xl mx-auto">
+                <div className="bg-white p-6 lg:p-8 shadow-sm border border-gray-200 rounded-lg">
                 {/* Avatar/Header Section */}
                 <div className="flex flex-col items-center mb-6">
                     {/* Avatar Placeholder (Blue circle with initials) */}
@@ -160,6 +162,7 @@ export default function Profile() {
                         {isUpdating ? "Saving Changes..." : "Save Profile"}
                     </button>
                 </form>
+                </div>
             </div>
         </DashboardLayout>
     );

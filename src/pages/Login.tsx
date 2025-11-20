@@ -1,6 +1,8 @@
 // FILE: src/pages/Login.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { useAuth } from "../hooks/useAuth";
 import toast, { Toaster } from "react-hot-toast";
 
 const departments = [
@@ -13,10 +15,39 @@ const departments = [
 ];
 
 export default function Login() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [department, setDepartment] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Handle auth callback and redirect if already authenticated
+  useEffect(() => {
+    // Check for auth callback in URL hash (from magic link)
+    const handleAuthCallback = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      if (hashParams.get('access_token') || hashParams.get('type')) {
+        // Wait a moment for Supabase to process the session
+        await new Promise(resolve => setTimeout(resolve, 500));
+        // Get the session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // Clear hash from URL
+          window.history.replaceState(null, '', window.location.pathname);
+          // Navigate to dashboard
+          navigate("/dashboard", { replace: true });
+        }
+      }
+    };
+
+    handleAuthCallback();
+
+    // Redirect if already authenticated
+    if (!isLoading && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   const handleLogin = async (e: any) => {
     e.preventDefault();
@@ -35,7 +66,7 @@ export default function Login() {
           full_name: fullName,
           department_id: department, // store department metadata
         },
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: `${window.location.origin}/dashboard`,
       },
     });
 
@@ -44,6 +75,20 @@ export default function Login() {
 
     setLoading(false);
   };
+
+  // Show loading while checking auth state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-gray-600 text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render login form if already authenticated (will redirect)
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
