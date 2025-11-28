@@ -13,7 +13,13 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
 
+    //handle name change
+    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFullName(event.target.value);
+    };
+
     //check if inputs are filled then navigates to dashboard
+
     const handleNext = () => {
         if (!fullName || !email) {
             setError('fill in you email and name and choose a department to proceed');
@@ -28,7 +34,7 @@ export default function Login() {
             <input
                 type='text'
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={handleNameChange}
                 placeholder='Type fullname'
                 required
             />

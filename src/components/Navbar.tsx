@@ -1,10 +1,11 @@
 import React from 'react'
+import '../cssfiles/nav.css';
 
-const Navbar = () => {
+function Navbar () {
     return (
-        <nav className='w-full bg-white shadow-sm'>
-            <h2>Impact labs task webapp</h2>
-            <button>Create</button>
+        <nav className='bar-container'>
+            <h2 className='title'>Impact labs task </h2>
+            
         </nav>
     )
 }

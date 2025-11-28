@@ -1,0 +1,16 @@
+.bar-container{
+    background-color: rgb(0, 174, 255);
+    flex: 1;
+    flex-direction: column;
+}
+.title{
+    font-size: 40px;
+    font-weight: 700;
+}
+.button-nav{
+    border-radius: 5px;
+    background-color: white;
+    padding: 10px;
+    border: 1.5px solid black;
+    cursor: pointer;
+}
